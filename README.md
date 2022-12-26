@@ -1,2 +1,3 @@
-# Knowing
-Study
+1. 리꾸를 시도
+2. Branch로 구분하여 개발 
+
