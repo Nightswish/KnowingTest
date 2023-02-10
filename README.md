@@ -1,3 +1,3 @@
-1. 리꾸를 시도
-2. Branch로 구분하여 개발 
+# My Development Soruces 
+## 개발 관련 내용
 
