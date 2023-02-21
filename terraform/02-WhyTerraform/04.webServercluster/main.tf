@@ -14,30 +14,34 @@ provider "aws" {
 } 
 
 resource "aws_launch_configuration" "example" {
-  image_id = "ami-0427c7b524bf024ed"
-  instance_type = "t2.micro"
+  image_id        = "ami-0427c7b524bf024ed"
+  instance_type   = "t2.micro"
   security_groups = [aws_security_group.instance.id]
 
   user_data = <<-EOF
-                 #!/bin/bash
-                 echo "Hello, World" > index.html
-                 nohub busybox httpd -f -p ${var.server_port} &
-                 EOF
+              #!/bin/bash
+              echo "Hello, World" > index.html
+              nohup busybox httpd -f -p ${var.server_port} &
+              EOF
 
+  # Required when using a launch configuration with an auto scaling group.
   lifecycle {
     create_before_destroy = true
-  }  
+  }
 }
 
 resource "aws_autoscaling_group" "example" {
   launch_configuration = aws_launch_configuration.example.name
-  vpc_zone_identifier = data.aws_subnets.default.ids
+  vpc_zone_identifier  = data.aws_subnets.default.ids
 
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
 
   min_size = 2
   max_size = 10
+
+  # add check
+  desired_capacity      = 3
 
   tag {
     key                 = "Name"
@@ -133,7 +137,7 @@ resource "aws_security_group" "alb" {
 
   name = var.alb_security_group_name
 
-  # HTTP 인바운드 트래픽 허용
+  # Allow inbound HTTP requests
   ingress {
     from_port   = 80
     to_port     = 80
@@ -141,7 +145,7 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # 모든 아웃바운트 트래픽 허용
+  # Allow all outbound requests
   egress {
     from_port   = 0
     to_port     = 0
@@ -149,4 +153,3 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
